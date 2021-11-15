@@ -4,6 +4,10 @@ pygame.init()
 clock = pygame.time.Clock()
 fps = 60
 
+pygame.mixer.init()
+pygame.mixer.music.load("sound/monkey.mp3")
+pygame.mixer.music.play(loops=-1)
+
 
 bottom_panel = 150
 screen_width = 800
@@ -33,23 +37,45 @@ class Fighter():
         self.alive = True
         self.animation_list = []
         self.frame_index = 0
+        self.action = 0
         self.update_time = pygame.time.get_ticks()
+        temp_list = []
         for i in range(8):
             img = pygame.image.load(f'img/{self.name}/idle/{i}.png')
             img = pygame.transform.scale(img, (img.get_width() * 3,img.get_height() * 3))
-            self.animation_list.append(img)
-        self.image = self.animation_list[self.frame_index]
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+        temp_list = []
+        for i in range(8):
+            img = pygame.image.load(f'img/{self.name}/attack/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width() * 3,img.get_height() * 3))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+        temp_list = []
+        for i in range(3):
+            img = pygame.image.load(f'img/{self.name}/hurt/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width() * 3,img.get_height() * 3))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+        temp_list = []
+        for i in range(9):
+            img = pygame.image.load(f'img/{self.name}/death/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width() * 3,img.get_height() * 3))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+        self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
     def update(self):
         animation_cooldown = 100
-        self.image = self.animation_list[self.frame_index]
+        self.image = self.animation_list[self.action][self.frame_index]
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.frame_index += 1
-        if self.frame_index >= len(self.animation_list):
+        if self.frame_index >= len(self.animation_list[self.action]):
             self.frame_index = 0
+ 
     def draw(self):
         screen.blit(self.image, self.rect)
 
@@ -70,8 +96,9 @@ while run:
     #draw_panel()
     knight.update()
     knight.draw()
-    #for bandit in bandit_list:
-    #    bandit.draw()
+    for bandit in bandit_list:
+        bandit.draw()
+        bandit.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
